@@ -76,6 +76,7 @@ stages:
 
 - stage: 'Empty'
   jobs:
+  - job: 'Do nothing :)'
 
 - stage: 'Dev'
   displayName: 'Deploy to the dev environment'
