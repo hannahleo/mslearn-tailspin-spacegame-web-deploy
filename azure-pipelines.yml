@@ -76,7 +76,8 @@ stages:
 
 - stage: 'Empty'
   jobs:
-  - job: 'DoNothing'
+  - deployment: Deploy
+    displayName: 'Do nothing'
     environment: doNothingEnv
 
 - stage: 'Dev'
