@@ -75,6 +75,7 @@ stages:
       artifact: drop
 
 - stage: 'Empty'
+  jobs:
 
 - stage: 'Dev'
   displayName: 'Deploy to the dev environment'
