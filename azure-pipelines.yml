@@ -1,17 +1,6 @@
-trigger:
-- '*'
-
 variables:
   buildConfiguration: 'Release'
   releaseBranchName: 'release'
-
-schedules:
-- cron: '0 3 * * *'
-  displayName: Deploy every day at 3 A.M.
-  branches:
-    include:
-    - release
-  always: false 
 
 stages:
 - stage: 'Build'
