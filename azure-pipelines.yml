@@ -68,11 +68,11 @@ stages:
     - task: XplatGenerateReleaseNotes@2
       inputs: 
          # Required arguments
-         outputfile: '$(Build.ArtifactStagingDirectory)\releasenotes.md'
+         outputfile: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
          templateLocation: File
          templatefile: 'build-handlebars-template.md'
          inlinetemplate: 'build-handlebars-template.md'
-    - publish: '$(Build.ArtifactStagingDirectory)'
+    - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
       artifact: ReleaseNotes
          
          
