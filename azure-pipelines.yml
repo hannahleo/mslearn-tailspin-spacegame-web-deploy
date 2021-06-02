@@ -62,6 +62,20 @@ stages:
 
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: drop
+      
+    # Generate Release Notes (Crossplatform)
+    # Description - Generates a release notes file in a format of your choice from the build or release history
+    - task: XplatGenerateReleaseNotes@2
+      inputs: 
+         # Required arguments
+         outputfile: '$(Build.ArtifactStagingDirectory)\releasenotes.md'
+         templateLocation: File
+         templatefile: 'build-handlebars-template.md'
+         inlinetemplate: 'build-handlebars-template.md'
+    - task: PublishReleaseNotesArtifacts@1
+      inputs:
+        pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: ReleaseNotes
          
          
 - stage: 'Empty'
@@ -99,18 +113,6 @@ stages:
               appName: '$(WebAppNameDev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
               
-          # Generate Release Notes (Crossplatform)
-          # Description - Generates a release notes file in a format of your choice from the build or release history
-          - task: XplatGenerateReleaseNotes@2
-            inputs: 
-               # Required arguments
-               outputfile: '$(Build.ArtifactStagingDirectory)\releasenotes.md'
-               templateLocation: File
-               templatefile: 'build-handlebars-template.md'
-               inlinetemplate: 'build-handlebars-template.md'
-               pathToPublish: '$(Build.ArtifactStagingDirectory)'
-               artifactName: ReleaseNotes
-
 
 - stage: 'Test'
   displayName: 'Deploy to the test environment'
