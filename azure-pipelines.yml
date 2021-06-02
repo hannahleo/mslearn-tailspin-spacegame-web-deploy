@@ -110,9 +110,7 @@ stages:
                inlinetemplate: 'build-handlebars-template.md'
                pathToPublish: '$(Build.ArtifactStagingDirectory)'
                artifactName: ReleaseNotes
-               
-           - publish: '$(Build.ArtifactStagingDirectory)'
-                artifact: ReleaseNotes
+
 
 - stage: 'Test'
   displayName: 'Deploy to the test environment'
