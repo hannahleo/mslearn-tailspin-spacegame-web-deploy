@@ -22,5 +22,9 @@ messing about
 changing on release branch 02/06 to test DevOps updating?
 
 Change readme to add:
+
 Item 6
+
 Items 1, 3 and 4
+
+Items 7 and 8
