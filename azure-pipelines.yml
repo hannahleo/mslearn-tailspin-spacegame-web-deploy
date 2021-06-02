@@ -72,7 +72,10 @@ stages:
          templateLocation: File
          templatefile: 'build-handlebars-template.md'
          inlinetemplate: 'build-handlebars-template.md'
-
+         pathToPublish: '$(Build.ArtifactStagingDirectory)'
+         artifactName: ReleaseNotes
+         
+         
 - stage: 'Empty'
   jobs:
   - deployment: Deploy
