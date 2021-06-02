@@ -63,9 +63,15 @@ stages:
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: drop
      
-    - task: XplatGenerateReleaseNotes@3
-      inputs:
+    # Generate Release Notes (Crossplatform)
+    # Description - Generates a release notes file in a format of your choice from the build or release history
+    - task: XplatGenerateReleaseNotes@2
+      inputs: 
+         # Required arguments
          outputfile: '$(Build.ArtifactStagingDirectory)\releasenotes.md'
+         templateLocation: File
+         templatefile: 'build-basic-template.md'
+         inlinetemplate: 'build-basic-template.md'
 
 - stage: 'Empty'
   jobs:
