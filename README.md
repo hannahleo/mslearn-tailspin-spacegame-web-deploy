@@ -21,4 +21,5 @@ messing about
 
 changing on release branch 02/06 to test DevOps updating?
 
-change readme :) for item 6 my org
+Change readme to add:
+Item 6
