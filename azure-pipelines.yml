@@ -70,8 +70,8 @@ stages:
          # Required arguments
          outputfile: '$(Build.ArtifactStagingDirectory)\releasenotes.md'
          templateLocation: File
-         templatefile: 'build-basic-template.md'
-         inlinetemplate: 'build-basic-template.md'
+         templatefile: 'build-handlebars-template.md'
+         inlinetemplate: 'build-handlebars-template.md'
 
 - stage: 'Empty'
   jobs:
