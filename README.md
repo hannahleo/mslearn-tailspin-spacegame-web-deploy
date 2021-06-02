@@ -18,3 +18,5 @@ I've edited the readme file on release branch :)
 I'm editing it again to link it to multiple items
 
 messing about
+
+changing on release branch 02/06 to test DevOps updating?
