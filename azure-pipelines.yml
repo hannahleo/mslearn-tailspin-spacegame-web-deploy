@@ -50,20 +50,7 @@ stages:
         command: 'build'
         arguments: '--no-restore --configuration $(buildConfiguration)'
         projects: '**/*.csproj'
-
-    # Generate Release Notes (Crossplatform)
-    # Description - Generates a release notes file in a format of your choice from the build or release history
-    - task: XplatGenerateReleaseNotes@2
-      inputs: 
-         # Required arguments
-         outputfile: '$(Build.ArtifactStagingDirectory)\releasenotes.md'
-         templateLocation: File
-         templatefile: 'build-handlebars-template.md'
-         inlinetemplate: 'build-handlebars-template.md'
-         pathToPublish: '$(Build.ArtifactStagingDirectory)'
-         artifactName: ReleaseNotes
-         
-         
+               
     - task: DotNetCoreCLI@2
       displayName: 'Publish the project - $(buildConfiguration)'
       inputs:
@@ -71,7 +58,7 @@ stages:
         projects: '**/*.csproj'
         publishWebProjects: false
         arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
-        zipAfterPublish: false
+        zipAfterPublish: true
 
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: drop
@@ -111,6 +98,21 @@ stages:
               azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameDev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+              
+          # Generate Release Notes (Crossplatform)
+          # Description - Generates a release notes file in a format of your choice from the build or release history
+          - task: XplatGenerateReleaseNotes@2
+            inputs: 
+               # Required arguments
+               outputfile: '$(Build.ArtifactStagingDirectory)\releasenotes.md'
+               templateLocation: File
+               templatefile: 'build-handlebars-template.md'
+               inlinetemplate: 'build-handlebars-template.md'
+               pathToPublish: '$(Build.ArtifactStagingDirectory)'
+               artifactName: ReleaseNotes
+               
+           - publish: '$(Build.ArtifactStagingDirectory)'
+                artifact: ReleaseNotes
 
 - stage: 'Test'
   displayName: 'Deploy to the test environment'
