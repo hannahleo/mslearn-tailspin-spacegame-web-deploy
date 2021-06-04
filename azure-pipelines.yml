@@ -1,3 +1,5 @@
+name: $(Date:yyyyMMdd)$(Rev:.r)_$(Build.BuildId)
+
 variables:
   buildConfiguration: 'Release'
   releaseBranchName: 'release'
