@@ -28,5 +28,3 @@ Item 6
 Try linking these again: Items 1, 3 and 4
 
 Items 7 and 8
-
-connecting to TandI bug 64720
