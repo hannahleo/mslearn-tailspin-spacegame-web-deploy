@@ -72,6 +72,7 @@ stages:
          templateLocation: File
          templatefile: 'build-handlebars-template.md'
          inlinetemplate: 'build-handlebars-template.md'
+         getParentsAndChildren: true
     - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
       artifact: ReleaseNotes
          
