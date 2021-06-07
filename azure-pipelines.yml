@@ -84,6 +84,10 @@ stages:
   - deployment: Deploy
     displayName: 'Do nothing'
     environment: doNothingEnv
+    pool:
+      vmImage: 'ubuntu-18.04'
+      demands:
+      - npm
 
 - stage: 'Dev'
   displayName: 'Deploy to the dev environment'
@@ -178,8 +182,13 @@ stages:
 
 - stage: 'Documentation'
   displayName: 'Documentation'
+  dependsOn: Build
+  pool:
+    vmImage: 'ubuntu-18.04'
+    demands:
+    - npm
   jobs: 
-  - job: 'ReleaseNotes'
+  - job: 'Publish release notes'
     displayName: 'Publish release notes'
     steps:
     # Generate Release Notes (Crossplatform)
@@ -193,4 +202,4 @@ stages:
          inlinetemplate: 'build-handlebars-template.md'
          getParentsAndChildren: true
     - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
-      artifact: ReleaseNotes
+      artifact: DocumentationReleaseNotes
