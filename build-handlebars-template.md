@@ -9,7 +9,7 @@
 {{/forEach}}
 
 # Global list of WI ({{workItems.length}})
-{{workItems}}
+{{workItems.length}}
 {{this.workItems}}
 
 {{#forEach workItems}}
