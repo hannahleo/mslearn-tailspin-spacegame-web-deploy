@@ -65,18 +65,18 @@ stages:
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: drop
       
-    # Generate Release Notes (Crossplatform)
-    # Description - Generates a release notes file in a format of your choice from the build or release history
-    - task: XplatGenerateReleaseNotes@2
-      inputs: 
-         # Required arguments
-         outputfile: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
-         templateLocation: File
-         templatefile: 'build-handlebars-template.md'
-         inlinetemplate: 'build-handlebars-template.md'
-         getParentsAndChildren: true
-    - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
-      artifact: ReleaseNotes
+    # # Generate Release Notes (Crossplatform)
+    # # Description - Generates a release notes file in a format of your choice from the build or release history
+    # - task: XplatGenerateReleaseNotes@2
+    #   inputs: 
+    #      # Required arguments
+    #      outputfile: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+    #      templateLocation: File
+    #      templatefile: 'build-handlebars-template.md'
+    #      inlinetemplate: 'build-handlebars-template.md'
+    #      getParentsAndChildren: true
+    # - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+    #   artifact: ReleaseNotes
          
          
 - stage: 'Empty'
@@ -177,8 +177,6 @@ stages:
               azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-
-
 
 - stage: 'Documentation'
   displayName: 'Documentation'
