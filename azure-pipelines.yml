@@ -200,8 +200,8 @@ stages:
          templatefile: 'build-handlebars-template.md'
          inlinetemplate: 'build-handlebars-template.md'
          
-    - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
-      artifact: DocumentationReleaseNotes
+    # - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+    #   artifact: DocumentationReleaseNotes
 
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
       inputs:
@@ -253,5 +253,5 @@ stages:
           {{/forEach}}
           {{/forEach}}
 
-    - publish: '$(Build.ArtifactStagingDirectory)/inline.md'
+    - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: DocumentationReleaseNotes
