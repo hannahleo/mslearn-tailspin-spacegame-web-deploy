@@ -138,18 +138,18 @@ stages:
               azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameTest)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
-  - job: waitForValidation
-    displayName: Wait for external validation  
-    pool: server    
-    timeoutInMinutes: 4320 # job times out in 3 days
-    steps:   
-     - task: ManualValidation@0
-       timeoutInMinutes: 1440 # task times out in 1 day
-       inputs:
-           notifyUsers: |
-              someone@example.com
-           instructions: 'Please validate the build configuration and resume'
-           onTimeout: 'resume'
+  # - job: waitForValidation
+  #   displayName: Wait for external validation  
+  #   pool: server    
+  #   timeoutInMinutes: 4320 # job times out in 3 days
+  #   steps:   
+  #    - task: ManualValidation@0
+  #      timeoutInMinutes: 1440 # task times out in 1 day
+  #      inputs:
+  #          notifyUsers: |
+  #             someone@example.com
+  #          instructions: 'Please validate the build configuration and resume'
+  #          onTimeout: 'resume'
 
 - stage: 'Staging'
   displayName: 'Deploy to the staging environment'
@@ -173,3 +173,24 @@ stages:
               azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
+
+
+- stage: 'Documentation'
+  displayName: 'Documentation'
+  jobs: 
+  - job: 'Publish release notes'
+    displayName: 'Publish release notes'
+    steps:
+    # Generate Release Notes (Crossplatform)
+    # Description - Generates a release notes file in a format of your choice from the build or release history
+    - task: XplatGenerateReleaseNotes@2
+      inputs: 
+         # Required arguments
+         outputfile: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+         templateLocation: File
+         templatefile: 'build-handlebars-template.md'
+         inlinetemplate: 'build-handlebars-template.md'
+         getParentsAndChildren: true
+    - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+      artifact: ReleaseNotes
