@@ -11,9 +11,9 @@
 # Global list of WI ({{workItems.length}})
 {{#forEach workItems}}
 {{#if isFirst}}## Associated Work Items (only shown if  WI) {{/if}}
-*  **{{this.id}}**  {{lookup this.fields 'System.Title'}}
+*  **{{this.id}}** null
   - **WIT** {{lookup this.fields 'System.WorkItemType'}} 
-  - **Tags** {{lookup this.fields 'System.Tags'}}
+  - **Tags** null
   - **Assigned** {{#with (lookup this.fields 'System.AssignedTo')}} {{displayName}} {{/with}}
 {{/forEach}}
 
