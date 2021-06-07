@@ -9,6 +9,9 @@
 {{/forEach}}
 
 # Global list of WI ({{workItems.length}})
+{{workItems}}
+{{this.workItems}}
+
 {{#forEach workItems}}
 {{#if isFirst}}## Associated Work Items (only shown if  WI) {{/if}}
 *  **{{this.id}}**  {{lookup this.fields 'System.Title'}}
