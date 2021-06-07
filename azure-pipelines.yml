@@ -205,7 +205,7 @@ stages:
 
     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
       inputs:
-        outputfile: '$(System.DefaultWorkingDirectory)\inline.md'
+        outputfile: '$(Build.ArtifactStagingDirectory)/inline.md'
         outputVariableName: OutputText
         templateLocation: InLine
         inlinetemplate: |
