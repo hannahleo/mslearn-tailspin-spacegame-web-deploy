@@ -179,7 +179,7 @@ stages:
 - stage: 'Documentation'
   displayName: 'Documentation'
   jobs: 
-  - job: 'Publish release notes'
+  - job: 'ReleaseNotes'
     displayName: 'Publish release notes'
     steps:
     # Generate Release Notes (Crossplatform)
