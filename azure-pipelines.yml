@@ -188,7 +188,7 @@ stages:
     demands:
     - npm
   jobs: 
-  - job: 'Publish release notes'
+  - job: 'ReleaseNotes'
     displayName: 'Publish release notes'
     steps:
     # Generate Release Notes (Crossplatform)
