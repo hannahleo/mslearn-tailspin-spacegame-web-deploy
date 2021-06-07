@@ -12,19 +12,3 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-I've edited the readme file on release branch :)
-
-I'm editing it again to link it to multiple items
-
-messing about
-
-changing on release branch 02/06 to test DevOps updating?
-
-Change readme to add:
-
-Item 6
-
-Try linking these again: Items 1, 3 and 4
-
-Items 7 and 8
