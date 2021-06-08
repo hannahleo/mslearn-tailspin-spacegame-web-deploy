@@ -142,6 +142,7 @@ stages:
          templateLocation: File
          templatefile: 'build-handlebars-template.md'
          inlinetemplate: 'build-handlebars-template.md'
+         checkStage: true
          
     - publish: '$(Build.ArtifactStagingDirectory)/devReleasenotes$(Build.BuildId).md'
       artifact: DevReleaseNotes
@@ -206,6 +207,7 @@ stages:
          templateLocation: File
          templatefile: 'build-handlebars-template.md'
          inlinetemplate: 'build-handlebars-template.md'
+         checkStage: true
          
     - publish: '$(Build.ArtifactStagingDirectory)/testReleasenotes$(Build.BuildId).md'
       artifact: TestReleaseNotes
@@ -256,6 +258,7 @@ stages:
          templateLocation: File
          templatefile: 'build-handlebars-template.md'
          inlinetemplate: 'build-handlebars-template.md'
+         checkStage: true
          
     # - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
     #   artifact: DocumentationReleaseNotes
