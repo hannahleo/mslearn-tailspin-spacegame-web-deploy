@@ -118,7 +118,7 @@ stages:
               appName: '$(WebAppNameDev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
-- stage: 'Documentation'
+- stage: 'Dev_Documentation'
   displayName: 'Dev Documentation'
   dependsOn: Dev
   pool:
@@ -180,7 +180,7 @@ stages:
   #          instructions: 'Please validate the build configuration and resume'
   #          onTimeout: 'resume'
 
-- stage: 'Documentation'
+- stage: 'Test_Documentation'
   displayName: 'Test Documentation'
   dependsOn: Test
   pool:
@@ -228,7 +228,7 @@ stages:
               appName: '$(WebAppNameStaging)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
-- stage: 'Documentation'
+- stage: 'Staging_Documentation'
   displayName: 'Staging Documentation'
   dependsOn: Staging
   pool:
