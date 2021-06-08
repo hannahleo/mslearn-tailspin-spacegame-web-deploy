@@ -144,8 +144,16 @@ stages:
          inlinetemplate: 'build-handlebars-template.md'
          checkStage: true
          overrideStageName: 'Dev'
+
+    - task: XplatGenerateReleaseNotes@3
+      inputs: 
+         # Required arguments
+         outputfile: '$(Build.ArtifactStagingDirectory)/devDumpReleasenotes$(Build.BuildId).md'
+         templateLocation: File
+         templatefile: 'build-handlebars-dump-template.md'
+         inlinetemplate: 'build-handlebars-dump-template.md'
          
-    - publish: '$(Build.ArtifactStagingDirectory)/devReleasenotes$(Build.BuildId).md'
+    - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: DevReleaseNotes
               
 
@@ -262,7 +270,8 @@ stages:
          inlinetemplate: 'build-handlebars-template.md'
          checkStage: true
          overrideStageName: 'Staging'
-         
+        
+
     # - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
     #   artifact: DocumentationReleaseNotes
 
