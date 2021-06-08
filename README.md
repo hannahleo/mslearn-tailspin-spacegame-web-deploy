@@ -24,3 +24,5 @@ changing on release branch 02/06 to test DevOps updating?
 Associating: 7, 8, 9, 12
 
 Adding a difference to be deployed to dev and test (not staging) - commit message "Dev and Test"
+
+Adding a difference to be deployed to all envs - commit message "Dev, Test and Staging"
