@@ -90,7 +90,7 @@ stages:
       - npm
 
 - stage: 'Dev'
-  displayName: 'Deploy to the dev environment'
+  displayName: 'Dev Deploy'
   dependsOn: Build
   condition: |
     and
@@ -117,10 +117,35 @@ stages:
               azureSubscription: 'Resource Manager - Tailspin - Space Game'
               appName: '$(WebAppNameDev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
+
+- stage: 'Documentation'
+  displayName: 'Dev Documentation'
+  dependsOn: Dev
+  pool:
+    vmImage: 'ubuntu-18.04'
+    demands:
+    - npm
+  jobs: 
+  - job: 'ReleaseNotes'
+    displayName: 'Publish release notes'
+    steps:
+
+    # Generate Release Notes (Crossplatform)
+    # Description - Generates a release notes file in a format of your choice from the build or release history
+    - task: XplatGenerateReleaseNotes@2
+      inputs: 
+         # Required arguments
+         outputfile: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+         templateLocation: File
+         templatefile: 'build-handlebars-template.md'
+         inlinetemplate: 'build-handlebars-template.md'
+         
+    - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+      artifact: DevReleaseNotes
               
 
 - stage: 'Test'
-  displayName: 'Deploy to the test environment'
+  displayName: 'Test Deploy'
   dependsOn: Dev
   #condition: eq(variables['Build.Reason'], 'Schedule')
   jobs:
@@ -155,8 +180,33 @@ stages:
   #          instructions: 'Please validate the build configuration and resume'
   #          onTimeout: 'resume'
 
+- stage: 'Documentation'
+  displayName: 'Test Documentation'
+  dependsOn: Test
+  pool:
+    vmImage: 'ubuntu-18.04'
+    demands:
+    - npm
+  jobs: 
+  - job: 'ReleaseNotes'
+    displayName: 'Publish release notes'
+    steps:
+
+    # Generate Release Notes (Crossplatform)
+    # Description - Generates a release notes file in a format of your choice from the build or release history
+    - task: XplatGenerateReleaseNotes@2
+      inputs: 
+         # Required arguments
+         outputfile: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+         templateLocation: File
+         templatefile: 'build-handlebars-template.md'
+         inlinetemplate: 'build-handlebars-template.md'
+         
+    - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+      artifact: TestReleaseNotes
+
 - stage: 'Staging'
-  displayName: 'Deploy to the staging environment'
+  displayName: 'Staging Deploy'
   dependsOn: Test
   jobs:
   - deployment: Deploy
@@ -179,8 +229,8 @@ stages:
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
 - stage: 'Documentation'
-  displayName: 'Documentation'
-  dependsOn: Build
+  displayName: 'Staging Documentation'
+  dependsOn: Staging
   pool:
     vmImage: 'ubuntu-18.04'
     demands:
@@ -254,4 +304,4 @@ stages:
           {{/forEach}}
 
     - publish: '$(Build.ArtifactStagingDirectory)'
-      artifact: DocumentationReleaseNotes
+      artifact: StagingReleaseNotes
