@@ -12,7 +12,7 @@ param( )
           }
           
           function getServerUrl() {
-            return [string]::Format("https://{0}{1}", $env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI, $env:SYSTEM_TEAMPROJECTID)
+            return [string]::Format("https://{0}{1}", "hannahleong", $env:SYSTEM_TEAMPROJECTID)
           }
           
           function InvokeRestApi($relativeUri, $authHeader) {
