@@ -19,7 +19,7 @@ param( )
              $baseUrl = getServerUrl
              $url = [Uri]::EscapeUriString((getServerUrl) + $relativeUri + "?api-version=5.0")
              Write-Host "Querying:" $url
-             return Invoke-WebRequest $url -Headers @{Authorization=($authHeader)} | ConvertFrom-Json
+             return Invoke-WebRequest -URI $url -Headers @{Authorization=($authHeader)} | ConvertFrom-Json
           }
           
           $auth = getAuthToken
