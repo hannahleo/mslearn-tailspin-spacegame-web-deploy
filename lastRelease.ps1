@@ -12,7 +12,7 @@ param( )
           }
           
           function getServerUrl() {
-            return [string]::Format("https://{0}{1}", "hannahleong", $env:SYSTEM_TEAMPROJECTID)
+            return [string]::Format("https://{0}{1}", $env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI, $env:SYSTEM_TEAMPROJECTID)
           }
           
           function InvokeRestApi($relativeUri, $authHeader) {
@@ -24,7 +24,7 @@ param( )
           
           $auth = getAuthToken
           
-          $url =  "/release/deployments?definitionId=" + $env:RELEASE_DEFINITIONID
+          $url =  "/release/deployments?definitionId=" + '1' #$env:RELEASE_DEFINITIONID
           $url += "&definitionEnvironmentId=" + $env:RELEASE_DEFINITIONENVIRONMENTID
           $url += "&deploymentStatus=succeeded"
           $url += "&queryOrder=descending"
