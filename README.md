@@ -12,17 +12,3 @@ provided by the bot. You will only need to do this once across all repos using o
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/).
 For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or
 contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
-
-I've edited the readme file on release branch :)
-
-I'm editing it again to link it to multiple items
-
-messing about
-
-changing on release branch 02/06 to test DevOps updating?
-
-Associating: 7, 8, 9, 12
-
-Adding a difference to be deployed to dev and test (not staging) - commit message "Dev and Test"
-
-Adding a difference to be deployed to all envs - commit message "Dev, Test and Staging"
