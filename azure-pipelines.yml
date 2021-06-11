@@ -100,11 +100,6 @@ stages:
   jobs: 
   - deployment: Deploy
     environment: documentation
-  - job: 'PowershellTask'
-    steps:
-    - task: Powershell@2
-      inputs:
-        filePath: lastRelease.ps1
   - job: 'ReleaseNotes'
     displayName: 'Publish release notes'
     steps:
@@ -134,12 +129,12 @@ stages:
 - stage: 'Dev'
   displayName: 'Dev Deploy'
   dependsOn: Build
-  condition: |
-    and
-    (
-      succeeded(),
-      eq(variables['Build.SourceBranchName'], variables['releaseBranchName'])
-    )
+  # condition: |
+  #   and
+  #   (
+  #     succeeded(),
+  #     eq(variables['Build.SourceBranchName'], variables['releaseBranchName'])
+  #   )
   jobs:
   - deployment: Deploy
     pool:
