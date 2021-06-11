@@ -90,41 +90,41 @@ stages:
       demands:
       - npm
 
-- stage: 'Dev_Documentation'
-  displayName: 'Dev Documentation'
-  dependsOn: Build
-  pool:
-    vmImage: 'ubuntu-18.04'
-    demands:
-    - npm
-  jobs: 
-  - deployment: Deploy
-    environment: documentation
-  - job: 'ReleaseNotes'
-    displayName: 'Publish release notes'
-    steps:
-    # Generate Release Notes (Crossplatform)
-    # Description - Generates a release notes file in a format of your choice from the build or release history
-    - task: XplatGenerateReleaseNotes@2
-      inputs: 
-         # Required arguments
-         outputfile: '$(Build.ArtifactStagingDirectory)/devReleasenotes$(Build.BuildId).md'
-         templateLocation: File
-         templatefile: 'build-handlebars-template.md'
-         inlinetemplate: 'build-handlebars-template.md'
-         checkStage: true
-         overrideStageName: 'Dev'
+# - stage: 'Dev_Documentation'
+#   displayName: 'Dev Documentation'
+#   dependsOn: Build
+#   pool:
+#     vmImage: 'ubuntu-18.04'
+#     demands:
+#     - npm
+#   jobs: 
+#   - deployment: Deploy
+#     environment: documentation
+#   - job: 'ReleaseNotes'
+#     displayName: 'Publish release notes'
+#     steps:
+#     # Generate Release Notes (Crossplatform)
+#     # Description - Generates a release notes file in a format of your choice from the build or release history
+#     - task: XplatGenerateReleaseNotes@2
+#       inputs: 
+#          # Required arguments
+#          outputfile: '$(Build.ArtifactStagingDirectory)/devReleasenotes$(Build.BuildId).md'
+#          templateLocation: File
+#          templatefile: 'build-handlebars-template.md'
+#          inlinetemplate: 'build-handlebars-template.md'
+#          checkStage: true
+#          overrideStageName: 'Dev'
 
-    - task: XplatGenerateReleaseNotes@3
-      inputs: 
-         # Required arguments
-         outputfile: '$(Build.ArtifactStagingDirectory)/devDumpReleasenotes$(Build.BuildId).md'
-         templateLocation: File
-         templatefile: 'release-handlebars-dump-template.md'
-         inlinetemplate: 'release-handlebars-dump-template.md'
+#     - task: XplatGenerateReleaseNotes@3
+#       inputs: 
+#          # Required arguments
+#          outputfile: '$(Build.ArtifactStagingDirectory)/devDumpReleasenotes$(Build.BuildId).md'
+#          templateLocation: File
+#          templatefile: 'release-handlebars-dump-template.md'
+#          inlinetemplate: 'release-handlebars-dump-template.md'
          
-    - publish: '$(Build.ArtifactStagingDirectory)'
-      artifact: DevReleaseNotes
+#     - publish: '$(Build.ArtifactStagingDirectory)'
+#       artifact: DevReleaseNotes
 
 - stage: 'Dev'
   displayName: 'Dev Deploy'
@@ -155,34 +155,34 @@ stages:
               appName: '$(WebAppNameDev)'
               package: '$(Pipeline.Workspace)/drop/$(buildConfiguration)/*.zip'
 
-- stage: 'Test_Documentation'
-  displayName: 'Test Documentation'
-  # dependsOn: Test
-  pool:
-    vmImage: 'ubuntu-18.04'
-    demands:
-    - npm
-  jobs: 
-  - deployment: Deploy
-    environment: documentation
-  - job: 'ReleaseNotes'
-    displayName: 'Publish release notes'
-    steps:
+# - stage: 'Test_Documentation'
+#   displayName: 'Test Documentation'
+#   # dependsOn: Test
+#   pool:
+#     vmImage: 'ubuntu-18.04'
+#     demands:
+#     - npm
+#   jobs: 
+#   - deployment: Deploy
+#     environment: documentation
+#   - job: 'ReleaseNotes'
+#     displayName: 'Publish release notes'
+#     steps:
 
-    # Generate Release Notes (Crossplatform)
-    # Description - Generates a release notes file in a format of your choice from the build or release history
-    - task: XplatGenerateReleaseNotes@2
-      inputs: 
-         # Required arguments
-         outputfile: '$(Build.ArtifactStagingDirectory)/testReleasenotes$(Build.BuildId).md'
-         templateLocation: File
-         templatefile: 'build-handlebars-template.md'
-         inlinetemplate: 'build-handlebars-template.md'
-         checkStage: true
-         overrideStageName: 'Test'
+#     # Generate Release Notes (Crossplatform)
+#     # Description - Generates a release notes file in a format of your choice from the build or release history
+#     - task: XplatGenerateReleaseNotes@2
+#       inputs: 
+#          # Required arguments
+#          outputfile: '$(Build.ArtifactStagingDirectory)/testReleasenotes$(Build.BuildId).md'
+#          templateLocation: File
+#          templatefile: 'build-handlebars-template.md'
+#          inlinetemplate: 'build-handlebars-template.md'
+#          checkStage: true
+#          overrideStageName: 'Test'
          
-    - publish: '$(Build.ArtifactStagingDirectory)/testReleasenotes$(Build.BuildId).md'
-      artifact: TestReleaseNotes
+#     - publish: '$(Build.ArtifactStagingDirectory)/testReleasenotes$(Build.BuildId).md'
+#       artifact: TestReleaseNotes
 
 - stage: 'Test'
   displayName: 'Test Deploy'
@@ -220,88 +220,88 @@ stages:
   #          instructions: 'Please validate the build configuration and resume'
   #          onTimeout: 'resume'
 
-- stage: 'Staging_Documentation'
-  displayName: 'Staging Documentation'
-  # dependsOn: Staging
-  pool:
-    vmImage: 'ubuntu-18.04'
-    demands:
-    - npm
-  jobs: 
-  - deployment: Deploy
-    environment: documentation
-  - job: 'ReleaseNotes'
-    displayName: 'Publish release notes'
-    steps:
+# - stage: 'Staging_Documentation'
+#   displayName: 'Staging Documentation'
+#   # dependsOn: Staging
+#   pool:
+#     vmImage: 'ubuntu-18.04'
+#     demands:
+#     - npm
+#   jobs: 
+#   - deployment: Deploy
+#     environment: documentation
+#   - job: 'ReleaseNotes'
+#     displayName: 'Publish release notes'
+#     steps:
 
-    # Generate Release Notes (Crossplatform)
-    # Description - Generates a release notes file in a format of your choice from the build or release history
-    - task: XplatGenerateReleaseNotes@2
-      inputs: 
-         # Required arguments
-         outputfile: '$(Build.ArtifactStagingDirectory)/stagingReleasenotes$(Build.BuildId).md'
-         templateLocation: File
-         templatefile: 'build-handlebars-template.md'
-         inlinetemplate: 'build-handlebars-template.md'
-         checkStage: true
-         overrideStageName: 'Staging'
+#     # Generate Release Notes (Crossplatform)
+#     # Description - Generates a release notes file in a format of your choice from the build or release history
+#     - task: XplatGenerateReleaseNotes@2
+#       inputs: 
+#          # Required arguments
+#          outputfile: '$(Build.ArtifactStagingDirectory)/stagingReleasenotes$(Build.BuildId).md'
+#          templateLocation: File
+#          templatefile: 'build-handlebars-template.md'
+#          inlinetemplate: 'build-handlebars-template.md'
+#          checkStage: true
+#          overrideStageName: 'Staging'
         
 
-    # - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
-    #   artifact: DocumentationReleaseNotes
+#     # - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
+#     #   artifact: DocumentationReleaseNotes
 
-    - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
-      inputs:
-        outputfile: '$(Build.ArtifactStagingDirectory)/stagingInline$(Build.BuildId).md'
-        outputVariableName: OutputText
-        templateLocation: InLine
-        inlinetemplate: |
-          # Notes for build 
-          **Build Number**: {{buildDetails.id}}
-          **Build Trigger PR Number**: {{lookup buildDetails.triggerInfo 'pr.number'}} 
+#     - task: richardfennellBM.BM-VSTS-XplatGenerateReleaseNotes.XplatGenerate-Release-Notes.XplatGenerateReleaseNotes@3
+#       inputs:
+#         outputfile: '$(Build.ArtifactStagingDirectory)/stagingInline$(Build.BuildId).md'
+#         outputVariableName: OutputText
+#         templateLocation: InLine
+#         inlinetemplate: |
+#           # Notes for build 
+#           **Build Number**: {{buildDetails.id}}
+#           **Build Trigger PR Number**: {{lookup buildDetails.triggerInfo 'pr.number'}} 
 
-          # Associated Pull Requests ({{pullRequests.length}})
-          {{#forEach pullRequests}}
-          {{#if isFirst}}### Associated Pull Requests (only shown if  PR) {{/if}}
-          *  **PR {{this.id}}**  {{this.title}}
-          {{/forEach}}
+#           # Associated Pull Requests ({{pullRequests.length}})
+#           {{#forEach pullRequests}}
+#           {{#if isFirst}}### Associated Pull Requests (only shown if  PR) {{/if}}
+#           *  **PR {{this.id}}**  {{this.title}}
+#           {{/forEach}}
 
-          # Builds with associated WI/CS ({{builds.length}})
-          {{#forEach builds}}
-          {{#if isFirst}}## Builds {{/if}}
-          ##  Build {{this.build.buildNumber}}
-          {{#forEach this.commits}}
-          {{#if isFirst}}### Commits {{/if}}
-          - CS {{this.id}}
-          {{/forEach}}
-          {{#forEach this.workitems}}
-          {{#if isFirst}}### Workitems {{/if}}
-          - WI {{this.id}}
-          {{/forEach}} 
-          {{/forEach}}
+#           # Builds with associated WI/CS ({{builds.length}})
+#           {{#forEach builds}}
+#           {{#if isFirst}}## Builds {{/if}}
+#           ##  Build {{this.build.buildNumber}}
+#           {{#forEach this.commits}}
+#           {{#if isFirst}}### Commits {{/if}}
+#           - CS {{this.id}}
+#           {{/forEach}}
+#           {{#forEach this.workitems}}
+#           {{#if isFirst}}### Workitems {{/if}}
+#           - WI {{this.id}}
+#           {{/forEach}} 
+#           {{/forEach}}
 
-          # Global list of WI ({{workItems.length}})
-          {{#forEach workItems}}
-          {{#if isFirst}}## Associated Work Items (only shown if  WI) {{/if}}
-          *  **{{this.id}}**  {{lookup this.fields 'System.Title'}}
-            - **WIT** {{lookup this.fields 'System.WorkItemType'}} 
-            - **Tags** {{lookup this.fields 'System.Tags'}}
-          {{/forEach}}
+#           # Global list of WI ({{workItems.length}})
+#           {{#forEach workItems}}
+#           {{#if isFirst}}## Associated Work Items (only shown if  WI) {{/if}}
+#           *  **{{this.id}}**  {{lookup this.fields 'System.Title'}}
+#             - **WIT** {{lookup this.fields 'System.WorkItemType'}} 
+#             - **Tags** {{lookup this.fields 'System.Tags'}}
+#           {{/forEach}}
 
-          {{#forEach commits}}
-          {{#if isFirst}}### Associated commits{{/if}}
-          * ** ID{{this.id}}** 
-            -  **Message:** {{this.message}}
-            -  **Commited by:** {{this.author.displayName}} 
-            -  **FileCount:** {{this.changes.length}} 
-          {{#forEach this.changes}}
-                -  **File path (TFVC or TfsGit):** {{this.item.path}}  
-                -  **File filename (GitHub):** {{this.filename}}  
-          {{/forEach}}
-          {{/forEach}}
+#           {{#forEach commits}}
+#           {{#if isFirst}}### Associated commits{{/if}}
+#           * ** ID{{this.id}}** 
+#             -  **Message:** {{this.message}}
+#             -  **Commited by:** {{this.author.displayName}} 
+#             -  **FileCount:** {{this.changes.length}} 
+#           {{#forEach this.changes}}
+#                 -  **File path (TFVC or TfsGit):** {{this.item.path}}  
+#                 -  **File filename (GitHub):** {{this.filename}}  
+#           {{/forEach}}
+#           {{/forEach}}
 
-    - publish: '$(Build.ArtifactStagingDirectory)'
-      artifact: StagingReleaseNotes
+#     - publish: '$(Build.ArtifactStagingDirectory)'
+#       artifact: StagingReleaseNotes
 
 - stage: 'Staging'
   displayName: 'Staging Deploy'

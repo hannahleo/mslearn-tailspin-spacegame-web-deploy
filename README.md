@@ -21,4 +21,4 @@ messing about
 
 changing on release branch 02/06 to test DevOps updating?
 
-Associating: 64889, 64890, 64891, 65407
+Associating: 64889, 64890, 64891, 65407 to test build from master
