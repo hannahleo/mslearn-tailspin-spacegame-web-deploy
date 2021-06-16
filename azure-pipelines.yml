@@ -62,12 +62,12 @@ stages:
         arguments: '--no-build --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/$(buildConfiguration)'
         zipAfterPublish: true
 
-    - template: release-notes-job.yml
-      parameters:
-        environment: dev
-
     - publish: '$(Build.ArtifactStagingDirectory)'
       artifact: drop
+
+  - template: release-notes-job.yml
+    parameters:
+      environment: dev
       
     # # Generate Release Notes (Crossplatform)
     # # Description - Generates a release notes file in a format of your choice from the build or release history
