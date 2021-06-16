@@ -1,0 +1,123 @@
+parameters:
+- name: 'environment'
+  type: string
+
+jobs:
+  - job: ReleaseNote
+    displayName: Release note
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.x"
+        displayName: "Use Python 3.x"
+      - script: |
+          pip install requests
+        displayName: "install requests module"
+        
+      - task: PythonScript@0
+        displayName: "Create release note test"
+        name: create
+        inputs:
+          scriptSource: inline 
+          workingDirectory: '$(Build.ArtifactStagingDirectory)'         
+          script: |
+            import requests
+            import re
+
+            baseUrl = '$(System.TeamFoundationCollectionUri)'
+            project = '$(System.TeamProject)'
+            projectId = '$(System.TeamProjectId)'
+            accessToken = '$(System.AccessToken)'
+            buildId = '$(Build.BuildId)'
+            buildNumber = '$(Build.BuildNumber)'
+            workItemId = 0
+            changesUrl = f'{baseUrl}/{projectId}/_apis/build/builds/{buildId}/changes?api-version=6.0'
+
+            r = requests.get(changesUrl, headers={'Authorization': 'Bearer '+accessToken})
+            changesData = r.json()
+            print (changesData)
+
+            itemIds = []
+
+            print (changesData['value'])
+            for x in (changesData['value']):
+              if 'AB#' in (x['message']).upper():                                   #ignores if lower case
+                abIndexes = [m.start() for m in re.finditer('AB#', (x['message']).upper())]   #gets start indexes of AB#
+
+                for i in abIndexes:
+                  idStart = i + 3                                           #Gets end of id
+
+                  workItemId = ''
+                  messageIndex = idStart
+
+                  while (x['message'][messageIndex]).isdigit() == True:
+                    workItemId += x['message'][messageIndex]
+                    messageIndex += 1
+                    if messageIndex == len(x['message']):
+                      break
+
+                  if workItemId not in itemIds:             #filters it anyway when requesting url
+                    itemIds.append(workItemId)
+
+                  print (itemIds) 
+
+            WIidList = ''
+            for x in itemIds:
+              WIidList = WIidList + x + ','
+
+            WIidList = WIidList[:-1]
+            print (WIidList)
+
+            keyWIData = []
+
+
+            def getKeyWIData( WIidList, keyWIData ):
+              try:
+                workItemUrl = f'{baseUrl}/{projectId}/_apis/wit/workitems?ids={WIidList}&api-version=6.0'
+                WIreq = requests.get(workItemUrl, headers={'Authorization': 'Bearer '+accessToken})
+                WIData = WIreq.json()                                         #use actual ids lol
+                print (WIData)
+
+                for x in WIData['value']:
+                  keyWIData.append("Work item ID:" + str(x['id']) + "\n    Item title: " + x['fields']['System.Title'] + "\n    Author: " + x['fields']['System.CreatedBy']['displayName'])
+                  print("Work item ID:" + str(x['id']) + ", Item title: " + x['fields']['System.Title'] + ", Author: " + x['fields']['System.CreatedBy']['displayName'])
+              
+              except KeyError:                                                #doesn't take into account other errors - e.g. bad formatting ('123,123,')
+                idStartIndex = WIData['message'].find('Work item ') + 10
+                idEndIndex = WIData['message'].find(' ', idStartIndex)
+                removeId = WIData['message'][idStartIndex:idEndIndex]
+                print ("id to remove: " + removeId)                   #this is correct
+                WIidList = WIidList.replace((removeId + ','), '')     #if not at the end
+                WIidList = WIidList.replace((',' + removeId), '')     #if it is at the end
+                print ("New work item list: " + WIidList)
+                getKeyWIData(WIidList, keyWIData)
+
+              except Exception as ex:
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                print (message)
+              except:
+                print("Error with work items: " + WIData['message'])
+                
+              return;
+
+            getKeyWIData(WIidList, keyWIData)
+
+            f = open("variables-test.txt", "a")
+            f.write("baseUrl="+baseUrl+"\n")
+            f.write("project="+project+"\n")
+            f.write("projectId="+projectId+"\n")
+            f.write("accessToken="+accessToken+"\n")
+            f.write("buildId="+buildId+"\n")
+            f.write("buildNumber="+buildNumber+"\n\n\n")
+            f.write("Associated work items: \n\n")
+
+            for x in keyWIData:
+              f.write(x + "\n")
+
+            f.close()
+     
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: drop
