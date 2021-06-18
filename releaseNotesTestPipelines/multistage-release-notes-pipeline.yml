@@ -1,0 +1,72 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: Build
+    displayName: Build simulation 
+    jobs:
+      - job: BuildJobSimulation
+        displayName: Build job - simulation
+        steps:
+          - script: echo Build simulation!
+            displayName: 'Build simulation'
+      - template: release-notes-job.yml
+        parameters:
+          environment: marcin-env1
+      # - template: changes-for-current-build.yml
+  - stage: UAT_deploy
+    displayName: UAT deploy - simulation of UAT env
+    dependsOn: Build
+    jobs:
+      - deployment: UAT_deploy
+        environment: marcin-env1
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo Build simulation!
+                  displayName: 'Build simulation'
+  - stage: QualityGatewayEnv
+    displayName: QualityGatewayEnvEnv 2 deploy - Quality Gateway Env
+    dependsOn: UAT_deploy
+    jobs:
+      - deployment: QualityGatewayDeployment
+        environment: marcin-env2
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo Quality of the application was accepted!
+                  displayName: 'Quality Gateway Env'
+      - job: ReleaseNoteAndTag
+        displayName: Release note generation and tagging
+        dependsOn: QualityGatewayDeployment
+        steps:
+          - template: stage-specific-release-notes.yml
+            parameters:
+              stageName: $(System.StageName)
+          - template: tag-environment-job.yml
+            parameters:
+              stageName: $(System.StageName)
+  - stage: STG_deploy
+    displayName: Env 3 deploy - simulation of STG environment
+    dependsOn: QualityGatewayEnv
+    jobs:
+      - deployment: STG_deploy
+        environment: marcin-env3
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: echo STG deployment sinulation!
+                  displayName: 'STG deployment sinulation'
+
+
+

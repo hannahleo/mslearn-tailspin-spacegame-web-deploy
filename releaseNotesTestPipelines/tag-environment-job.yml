@@ -1,0 +1,27 @@
+parameters:
+  - name: stageName
+    type: string
+  
+steps:
+  - task: PythonScript@0
+    displayName: "Add tag to build"
+    name: tag
+    condition: always()
+    inputs:
+      scriptSource: inline 
+      workingDirectory: '$(Build.ArtifactStagingDirectory)'         
+      script: |
+        import requests
+
+        baseUrl = '$(System.TeamFoundationCollectionUri)'
+        project = '$(System.TeamProject)'
+        projectId = '$(System.TeamProjectId)'
+        accessToken = '$(System.AccessToken)'
+        buildId = '$(Build.BuildId)'
+        putTagUrl = f'{baseUrl}/{projectId}/_apis/build/builds/{buildId}/tags/${{ parameters.stageName }}?api-version=6.0'
+        getTagUrl = f'{baseUrl}/{projectId}/_apis/build/builds/{buildId}/tags?api-version=6.0'
+
+        requests.put(putTagUrl, headers={'Authorization': 'Bearer '+ accessToken})
+        r = requests.get(getTagUrl, headers={'Authorization': 'Bearer '+ accessToken})
+        addedTag = r.json()
+        print ("Added tag: " + addedTag['value'][0])

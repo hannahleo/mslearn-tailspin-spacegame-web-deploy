@@ -1,0 +1,190 @@
+parameters:
+  - name: stageName
+    type: string
+  
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: "3.x"
+    displayName: "Use Python 3.x"
+  - script: |
+      pip install requests
+    displayName: "install requests module"
+    
+  - task: PythonScript@0
+    displayName: "Get changes since last deployment"
+    name: create
+    inputs:
+      scriptSource: inline 
+      workingDirectory: '$(Build.ArtifactStagingDirectory)'         
+      script: |
+        import requests
+        import re
+
+        baseUrl = '$(System.TeamFoundationCollectionUri)'
+        project = '$(System.TeamProject)'
+        projectId = '$(System.TeamProjectId)'
+        accessToken = '$(System.AccessToken)'
+        definitionId = '$(System.DefinitionId)'
+        currentBuildId = '$(Build.BuildId)'
+        buildNumber = '$(Build.BuildNumber)'
+
+        # Get last build that was deployed to the environment
+        lastBuildUrl = f'{baseUrl}/{projectId}/_apis/build/builds?definition={definitionId}&tagFilters=${{ parameters.stageName }}&queryOrder=startTimeDescending&$top=1&api-version=6.0'            
+        r = requests.get(lastBuildUrl, headers={'Authorization': 'Bearer '+ accessToken})
+        lastBuildInfo = r.json()
+        previousBuildId = lastBuildInfo['value'][0]['id']
+        minTime = lastBuildInfo['value'][0]['startTime']
+        print ("Last build to deploy to stage: " + str(previousBuildId) + "\nStart time: " + minTime)
+
+        # Builds since last deployment
+        buildIDs = []
+        buildsUrl = f'{baseUrl}/{projectId}/_apis/build/builds?definition={definitionId}&minTime={minTime}&queryOrder=startTimeDescending&api-version=6.0'
+        print("Builds url: " + buildsUrl)
+        buildsReq = requests.get(buildsUrl, headers={'Authorization': 'Bearer '+ accessToken})
+        buildsInfo = buildsReq.json()
+        print("\nNumber of changes: " + str(buildsInfo['count']))
+        for x in buildsInfo['value']:
+          buildIDs.append(x['id'])
+        print (buildIDs)
+
+        # Get work items list for all the builds
+        itemIds = []
+        WIidList = ''
+
+        for b in buildIDs:
+          buildId = b        
+          changesUrl = f'{baseUrl}/{projectId}/_apis/build/builds/{buildId}/changes?api-version=6.0'
+          c = requests.get(changesUrl, headers={'Authorization': 'Bearer '+ accessToken})
+          changesData = c.json()
+
+          for x in (changesData['value']):
+            if 'AB#' in (x['message']).upper():                                   #ignores if lower case
+              abIndexes = [m.start() for m in re.finditer('AB#', (x['message']).upper())]   #gets start indexes of AB#
+
+              for i in abIndexes:
+                idStart = i + 3                                           #Gets end of id
+
+                workItemId = ''
+                messageIndex = idStart
+
+                while (x['message'][messageIndex]).isdigit() == True:
+                  workItemId += x['message'][messageIndex]
+                  messageIndex += 1
+                  if messageIndex == len(x['message']):
+                    break
+
+                if workItemId not in itemIds:             #filters it anyway when requesting url
+                  itemIds.append(workItemId)
+
+                print (itemIds) 
+
+        for x in itemIds:
+          WIidList = WIidList + x + ','
+          print("WIidList: " + WIidList)
+
+        WIidList = re.sub(",0*", ',', WIidList[:-1])      #ignores any leading 0s
+        print(WIidList)
+
+
+        #Get key info about WIs that need to be added to release notes
+        keyWIData = []
+
+        def getKeyWIData( WIidList, keyWIData ):
+          try:
+            workItemUrl = f'{baseUrl}/{projectId}/_apis/wit/workitems?ids={WIidList}&api-version=6.0&$expand=relations'
+            print("Requested WI url: " + workItemUrl)
+            WIreq = requests.get(workItemUrl, headers={'Authorization': 'Bearer '+accessToken})
+            WIData = WIreq.json()                                         #use actual ids lol
+            print (WIData)
+
+            for x in WIData['value']:
+              workItemInfo = "Work item ID:" + str(x['id']) + "\n    Item title: " + x['fields']['System.Title'] + "\n    State: " + x['fields']['System.State']+ "\n    Author: " + x['fields']['System.CreatedBy']['displayName'] + "\n    Tags: "
+              
+              #Check for tags
+              try:
+                workItemInfo += x['fields']['System.Tags']
+              except:             #no tags associated
+                pass
+
+              #Check for relations
+              try:
+                parentWIs = '\n    Parent work items: '
+                childrenWIs = '\n    Children work items: '
+                for y in x['relations']:
+                  if y['attributes']['name'] == "Parent":
+                    parentReq = requests.get(y['url'], headers={'Authorization': 'Bearer '+accessToken})
+                    parentInfo = parentReq.json()
+                    parentId = str(parentInfo['id'])
+                    parentTitle = parentInfo['fields']['System.Title']
+                    parentWIs += parentId + ": " + parentTitle + "; "
+                  elif y['attributes']['name'] == "Child":
+                    childReq = requests.get(y['url'], headers={'Authorization': 'Bearer '+accessToken})
+                    childInfo = childReq.json()
+                    childId = str(childInfo['id'])
+                    childTitle = childInfo['fields']['System.Title']
+                    childrenWIs += childId + ": " + childTitle + "; "
+                workItemInfo += parentWIs + childrenWIs
+              except:
+                pass
+
+
+              keyWIData.append(workItemInfo)
+              print("Work item ID:" + str(x['id']) + ", Item title: " + x['fields']['System.Title'] + ", Author: " + x['fields']['System.CreatedBy']['displayName'])
+          
+          except KeyError:
+            removeIds = []
+            if 'The following Ids are not valid:' in WIData['message']:               #if invalid ids (i.e. too long)
+              print("Multiple invalid ids")
+              idStartIndex = WIData['message'].find(':') + 2
+              while WIData['message'].find(',', idStartIndex) != -1:
+                idEndIndex = WIData['message'].find(',', idStartIndex)
+                removeIds.append(WIData['message'][idStartIndex:idEndIndex])
+                idStartIndex = WIData['message'].find(',', idStartIndex) + 1
+              idEndIndex = WIData['message'].find('.', idStartIndex)
+              removeIds.append(WIData['message'][idStartIndex:idEndIndex])
+            else:                                                                     #if only one invalid workitem (only presents one at a time :( )
+              print("Invalid work item") 
+              idStartIndex = WIData['message'].find('Work item ') + 10
+              idEndIndex = WIData['message'].find(' ', idStartIndex)
+              removeId = WIData['message'][idStartIndex:idEndIndex]
+              removeIds.append(removeId)
+              print ("id to remove: " + removeId)                   #this is correct
+
+            for x in removeIds:
+              WIidList = WIidList.replace((x + ','), '')     #if not at the end
+              WIidList = WIidList.replace((',' + x), '')     #if it is at the end
+
+            print ("New work item list: " + WIidList)
+            getKeyWIData(WIidList, keyWIData)
+
+          except Exception as ex:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(ex).__name__, ex.args)
+            print (message)
+          except:
+            print("Error with work items: " + WIData['message'])
+            
+          return;
+
+        if WIidList != '':
+          getKeyWIData(WIidList, keyWIData)
+
+        f = open("variables-test.txt", "a")
+        f.write("baseUrl="+baseUrl+"\n")
+        f.write("project="+project+"\n")
+        f.write("projectId="+projectId+"\n")
+        f.write("accessToken="+accessToken+"\n")
+        f.write("buildId="+currentBuildId+"\n")
+        f.write("buildNumber="+buildNumber+"\n\n\n")
+        f.write("Associated work items since last deployment to ${{ parameters.stageName }} environment: \n\n")
+
+        for x in keyWIData:
+          f.write(x + "\n")
+
+        f.close()
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: ${{ parameters.stageName }}_releaseNotes

@@ -1,0 +1,169 @@
+parameters:
+- name: 'environment'
+  type: string
+
+jobs:
+  - job: ReleaseNote
+    displayName: Release note
+    steps:
+      - task: UsePythonVersion@0
+        inputs:
+          versionSpec: "3.x"
+        displayName: "Use Python 3.x"
+      - script: |
+          pip install requests
+        displayName: "install requests module"
+        
+      - task: PythonScript@0
+        displayName: "Create release note test"
+        name: create
+        inputs:
+          scriptSource: inline 
+          workingDirectory: '$(Build.ArtifactStagingDirectory)'         
+          script: |
+            import requests
+            import re
+
+            baseUrl = '$(System.TeamFoundationCollectionUri)'
+            project = '$(System.TeamProject)'
+            projectId = '$(System.TeamProjectId)'
+            accessToken = '$(System.AccessToken)'
+            buildId = '$(Build.BuildId)'
+            buildNumber = '$(Build.BuildNumber)'
+            changesUrl = f'{baseUrl}/{projectId}/_apis/build/builds/{buildId}/changes?api-version=6.0'
+
+            r = requests.get(changesUrl, headers={'Authorization': 'Bearer '+accessToken})
+            changesData = r.json()
+            print (changesData)
+
+            itemIds = []
+
+            print (changesData['value'])
+            for x in (changesData['value']):
+              if 'AB#' in (x['message']).upper():                                   #ignores if lower case
+                abIndexes = [m.start() for m in re.finditer('AB#', (x['message']).upper())]   #gets start indexes of AB#
+
+                for i in abIndexes:
+                  idStart = i + 3                                           #Gets end of id
+
+                  workItemId = ''
+                  messageIndex = idStart
+
+                  while (x['message'][messageIndex]).isdigit() == True:
+                    workItemId += x['message'][messageIndex]
+                    messageIndex += 1
+                    if messageIndex == len(x['message']):
+                      break
+
+                  if workItemId not in itemIds:             #filters it anyway when requesting url
+                    itemIds.append(workItemId)
+
+                  print (itemIds) 
+
+            WIidList = ''
+            for x in itemIds:
+              WIidList = WIidList + x + ','
+
+            WIidList = re.sub(",0*", ',', WIidList[:-1])      #ignores any leading 0s
+            print (WIidList)
+
+            keyWIData = []
+
+
+            def getKeyWIData( WIidList, keyWIData ):
+              try:
+                workItemUrl = f'{baseUrl}/{projectId}/_apis/wit/workitems?ids={WIidList}&api-version=6.0&$expand=relations'
+                print("Requested WI url: " + workItemUrl)
+                WIreq = requests.get(workItemUrl, headers={'Authorization': 'Bearer '+accessToken})
+                WIData = WIreq.json()                                         #use actual ids lol
+                print (WIData)
+
+                for x in WIData['value']:
+                  workItemInfo = "Work item ID:" + str(x['id']) + "\n    Item title: " + x['fields']['System.Title'] + "\n    State: " + x['fields']['System.State']+ "\n    Author: " + x['fields']['System.CreatedBy']['displayName'] + "\n    Tags: "
+                  
+                  #Check for tags
+                  try:
+                    workItemInfo += x['fields']['System.Tags']
+                  except:             #no tags associated
+                    pass
+
+                  #Check for relations
+                  try:
+                    parentWIs = '\n    Parent work items: '
+                    childrenWIs = '\n    Children work items: '
+                    for y in x['relations']:
+                      if y['attributes']['name'] == "Parent":
+                        parentReq = requests.get(y['url'], headers={'Authorization': 'Bearer '+accessToken})
+                        parentInfo = parentReq.json()
+                        parentId = str(parentInfo['id'])
+                        parentTitle = parentInfo['fields']['System.Title']
+                        parentWIs += parentId + ": " + parentTitle + "; "
+                      elif y['attributes']['name'] == "Child":
+                        childReq = requests.get(y['url'], headers={'Authorization': 'Bearer '+accessToken})
+                        childInfo = childReq.json()
+                        childId = str(childInfo['id'])
+                        childTitle = childInfo['fields']['System.Title']
+                        childrenWIs += childId + ": " + childTitle + "; "
+                    workItemInfo += parentWIs + childrenWIs
+                  except:
+                    pass
+
+
+                  keyWIData.append(workItemInfo)                  
+                  print("Work item ID:" + str(x['id']) + ", Item title: " + x['fields']['System.Title'] + ", Author: " + x['fields']['System.CreatedBy']['displayName'])
+              
+              except KeyError:
+                removeIds = []
+                if 'The following Ids are not valid:' in WIData['message']:               #if invalid ids (i.e. too long)
+                  print("Multiple invalid ids")
+                  idStartIndex = WIData['message'].find(':') + 2
+                  while WIData['message'].find(',', idStartIndex) != -1:
+                    idEndIndex = WIData['message'].find(',', idStartIndex)
+                    removeIds.append(WIData['message'][idStartIndex:idEndIndex])
+                    idStartIndex = WIData['message'].find(',', idStartIndex) + 1
+                  idEndIndex = WIData['message'].find('.', idStartIndex)
+                  removeIds.append(WIData['message'][idStartIndex:idEndIndex])
+                else:                                                                     #if only one invalid workitem (only presents one at a time :( )
+                  print("Invalid work item")
+                  idStartIndex = WIData['message'].find('Work item ') + 10
+                  idEndIndex = WIData['message'].find(' ', idStartIndex)
+                  removeId = WIData['message'][idStartIndex:idEndIndex]
+                  removeIds.append(removeId)
+                  print ("id to remove: " + removeId)                   #this is correct
+
+                for x in removeIds:
+                  WIidList = WIidList.replace((x + ','), '')     #if not at the end
+                  WIidList = WIidList.replace((',' + x), '')     #if it is at the end
+
+                print ("New work item list: " + WIidList)
+                getKeyWIData(WIidList, keyWIData)
+
+              except Exception as ex:
+                template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+                message = template.format(type(ex).__name__, ex.args)
+                print (message)
+              except:
+                print("Error with work items: " + WIData['message'])
+                
+              return;
+
+            getKeyWIData(WIidList, keyWIData)
+
+            f = open("variables-test.txt", "a")
+            f.write("baseUrl="+baseUrl+"\n")
+            f.write("project="+project+"\n")
+            f.write("projectId="+projectId+"\n")
+            f.write("accessToken="+accessToken+"\n")
+            f.write("buildId="+buildId+"\n")
+            f.write("buildNumber="+buildNumber+"\n\n\n")
+            f.write("Associated work items: \n\n")
+
+            for x in keyWIData:
+              f.write(x + "\n")
+
+            f.close()
+     
+      - task: PublishBuildArtifacts@1
+        inputs:
+          pathToPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: drop
