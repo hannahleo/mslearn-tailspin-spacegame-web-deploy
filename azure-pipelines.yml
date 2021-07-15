@@ -3,6 +3,21 @@ name: $(Date:yyyyMMdd)$(Rev:.r)_$(Build.BuildId)
 variables:
   buildConfiguration: 'Release'
   releaseBranchName: 'release'
+  QUALITY_GATEWAY_TAG_NAME: QualityGateway
+  PO_GATEWAY_TAG_NAME: POGateway
+  curBuildRNs: True
+  QualityGatewayState: "In Progress"
+  POGatewayState: "In Progress"
+
+pool:
+  vmImage: ubuntu-latest
+resources:
+  repositories:
+    - repository: devops_tools
+      type: githubenterprise
+      name: KTI/PyRelease
+      endpoint: "GitHubEnterprise"
+      ref: refs/heads/feature/release-notes
 
 stages:
 - stage: 'Build'
@@ -81,7 +96,19 @@ stages:
     #      getParentsAndChildren: true
     # - publish: '$(Build.ArtifactStagingDirectory)/releasenotes.md'
     #   artifact: ReleaseNotes
-         
+- stage: ReleaseNotes # generation of release notes can take some time so it is good to do it in parallel
+  displayName: Create release notes 
+  dependsOn: []     
+  jobs:
+    - job: ReleaseNotes
+      displayName: Create release notes
+      steps:
+        - template: templates/release-notes/stage-specific-release-notes.yml@devops_tools
+          parameters:
+            tags:
+              - "${{ variables.QUALITY_GATEWAY_TAG_NAME }}"
+              - "${{ variables.PO_GATEWAY_TAG_NAME }}"
+            curBuildRNs: ${{ variables.curBuildRNs }}         
          
 - stage: 'Empty'
   displayName: 'Approve this build?'
